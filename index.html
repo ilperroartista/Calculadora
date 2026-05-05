@@ -53,16 +53,18 @@
       --green-glow: rgba(83, 181, 91, 0.85);
       --red: #b44a4a;
       --red-dim: #8f3b3b;
-      --btn-size: 50px;        /* Tamaño base más grande para mejor tacto */
+      --btn-size: calc((100dvh - 260px) / 5);
+      --btn-size: min(64px, var(--btn-size));
       --gap: 12px;
       --radius: 30px;
       --font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
     }
 
-    html, body {
-      height: 100%;
-      width: 100%;
-    }
+   html, body {
+  height: 100%;
+  height: 100dvh;
+  overflow: hidden; 
+}
 
     body {
       background:
@@ -78,18 +80,21 @@
       margin: 0;
     }
 
-    .device {
-      width: 100%;
-      max-width: 380px;         /* Se ajusta al ancho total de iPhone SE */
-      padding: 20px 16px 16px;
-      border-radius: 4px 4px 30px 30px;
-      background: linear-gradient(180deg, #f5efe5 0%, var(--case-bg) 100%);
-      border: 1px solid var(--case-line);
-      box-shadow: var(--case-shadow);
-      user-select: none;
-      position: relative;
-      margin: 0 auto;
-    }
+.device {
+  width: 100%;
+  max-width: 380px;
+  height: 100%;            
+  display: flex;
+  flex-direction: column;
+  padding: 20px 16px 16px;
+  border-radius: 4px 4px 30px 30px;
+  background: linear-gradient(180deg, #f5efe5 0%, var(--case-bg) 100%);
+  border: 1px solid var(--case-line);
+  box-shadow: var(--case-shadow);
+  user-select: none;
+  position: relative;
+  margin: 0 auto;
+}
 
     .topbar {
       display: flex;
@@ -151,7 +156,7 @@
       display: flex;
       flex-direction: column;
       gap: 8px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
 
     .screen-lights {
@@ -243,6 +248,8 @@
       grid-template-columns: repeat(4, var(--btn-size));
       gap: var(--gap);
       justify-content: center;
+      align-content: center;      
+      flex: 1;                   
       margin-top: 6px;
     }
 
@@ -371,8 +378,7 @@
     /* Ajustes específicos para pantallas muy pequeñas (iPhone SE) */
     @media (max-width: 380px) {
       :root {
-        --btn-size: 48px;
-        --gap: 10px;
+       --gap: 10px;
       }
 
       .device {
