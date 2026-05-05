@@ -1,506 +1,443 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<!-- PWA manifest -->
-<link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Braun Calc">
-<meta name="theme-color" content="#f2efe7">
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Braun ET — Calculadora</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-
-  :root {
-    --page-bg:        #e7e2d8;
-    --case-bg:        #efe8dc;
-    --case-shadow:    0 18px 40px rgba(0, 0, 0, 0.14), 0 3px 10px rgba(0, 0, 0, 0.08);
-    --case-line:      rgba(90, 76, 58, 0.12);
-
-    --panel-bg:       #f3eee4;
-    --panel-line:     rgba(70, 60, 45, 0.14);
-
-    --lcd-bg:         #c3c8b7;
-    --lcd-frame:      #d6d2c8;
-    --lcd-text:       #4a4d47;
-    --lcd-sub:        #73766f;
-
-    --num-bg:         #a8a59d;
-    --num-bg-hover:   #9c9991;
-    --num-bg-active:  #929087;
-
-    --fn-bg:          #2f2a25;
-    --fn-bg-hover:    #3a342d;
-    --fn-bg-active:   #211d19;
-
-    --eq-bg:          #c79a2e;
-    --eq-bg-hover:    #b88926;
-    --eq-bg-active:   #a77620;
-
-    --text-dark:      #171510;
-    --text-light:     #f5f3ee;
-    --brand:          #9d968b;
-    --brand-strong:   #756e63;
-
-    --green:          #53b55b;
-    --green-glow:     rgba(83, 181, 91, 0.85);
-    --red:            #b44a4a;
-    --red-dim:        #8f3b3b;
-
-    --btn-size:       40px;
-    --gap:            14px;
-    --radius:         30px;
-    --font:           -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  }
-
-  html, body {
-    height: 100%;
-  }
-
-  body {
-    background:
-      radial-gradient(circle at top, rgba(255,255,255,0.45), transparent 38%),
-      linear-gradient(180deg, #f1ebe1 0%, var(--page-bg) 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font);
-    -webkit-font-smoothing: antialiased;
-    color: var(--text-dark);
-  }
-
-  .device {
-    width: 290px;
-    padding: 18px;
-    border-radius: 4px 4px 30px 30px;
-    background: linear-gradient(180deg, #f5efe5 0%, var(--case-bg) 100%);
-    border: 1px solid var(--case-line);
-    box-shadow: var(--case-shadow);
-    user-select: none;
-    position: relative;
-  }
-
-  .topbar {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 12px;
-    gap: 14px;
-  }
-
-  .brand {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding-top: 1px;
-  }
-
-  .brand-name {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: var(--brand);
-  }
-
-  .brand-model {
-    font-size: 9px;
-    font-weight: 500;
-    letter-spacing: 0.16em;
-    color: var(--brand);
-    text-transform: uppercase;
-  }
-
-  .status-lights {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    padding-top: 3px;
-  }
-
-  .status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    border: 1px solid rgba(0,0,0,0.18);
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.25);
-    opacity: 0.92;
-  }
-
-  .status-dot.green {
-    background: radial-gradient(circle at 35% 35%, #9cf4a2 0%, var(--green) 42%, #2f8e38 100%);
-    box-shadow: 0 0 6px var(--green-glow), inset 0 1px 1px rgba(255,255,255,0.35);
-  }
-
-  .status-dot.red {
-    background: radial-gradient(circle at 35% 35%, #ff9c9c 0%, #d76464 42%, var(--red-dim) 100%);
-  }
-
-  .screen-row {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-
-  .screen-lights {
-  display: flex;
-  flex-direction: row;
-  gap: 15px;
-  align-items: center;
-  padding-left: 4px;
-}
-  .display-shell {
-    background: linear-gradient(180deg, #e4dfd5 0%, #d9d2c7 100%);
-    border: 1px solid var(--lcd-frame);
-    border-radius: 4px;
-    padding: 12px;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.55),
-      inset 0 -1px 0 rgba(0,0,0,0.05);
-  }
-
-  .display {
-    height: 40px;
-    border-radius: 4px;
-    background:
-      linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0)),
-      linear-gradient(180deg, #c7ccb9 0%, var(--lcd-bg) 100%);
-    border: 1px solid rgba(87, 92, 80, 0.18);
-    box-shadow:
-      inset 0 2px 5px rgba(255,255,255,0.28),
-      inset 0 -2px 6px rgba(63, 70, 56, 0.08);
-    padding: 6px 10px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: flex-end;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .display::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 35%, rgba(0,0,0,0.03));
-    pointer-events: none;
-  }
-
-  .display-expr {
-    position: relative;
-    z-index: 1;
-    font-size: 9px;
-    font-weight: 500;
-    color: var(--lcd-sub);
-    letter-spacing: 0.08em;
-    min-height: 10px;
-    text-align: right;
-    word-break: break-all;
-    opacity: 0.9;
-  }
-
-  .display-main {
-    position: relative;
-    z-index: 1;
-    font-family: 'Orbitron', monospace;
-    font-size: 18px;
-    font-weight: 500;
-    color: var(--lcd-text);
-    letter-spacing: 0.08em;
-    text-align: right;
-    word-break: break-all;
-    line-height: 1;
-    margin-top: 2px;
-    text-shadow: 0 1px 0 rgba(255,255,255,0.18);
-    transition: opacity 0.08s ease;
-  }
-
-  .display-main.flash {
-    opacity: 0.38;
-  }
-
-  .display-main.error {
-    font-size: 18px;
-    color: #7a4a4a;
-    letter-spacing: 0.03em;
-  }
-
-  .slider-wrap {
-    background: linear-gradient(180deg, #e4dfd4 0%, #d8d1c5 100%);
-    border: 1px solid rgba(86, 76, 58, 0.14);
-    border-radius: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 0;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
-  }
-
-  .slider {
-    width: 10px;
-    height: 100%;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #8c8478 0%, #b9b0a1 26%, #8d8477 100%);
-    position: relative;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
-  }
-
-  .slider::before,
-  .slider::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    background: linear-gradient(180deg, #f1f0ea 0%, #d5cdbf 100%);
-    border: 1px solid rgba(80, 72, 60, 0.18);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.12), inset 0 1px 1px rgba(255,255,255,0.45);
-  }
-
-  .slider::before {
-    top: 5px;
-  }
-
-  .slider::after {
-    bottom: 5px;
-    background: linear-gradient(180deg, #d5d7d1 0%, #b9bab5 100%);
-  }
-
-  .slider-knob {
-    position: absolute;
-    left: 50%;
-    top: 52%;
-    transform: translate(-50%, -50%);
-    width: 20px;
-    height: 28px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, #faf8f1 0%, #d9d2c7 100%);
-    border: 1px solid rgba(67, 58, 48, 0.18);
-    box-shadow:
-      0 2px 3px rgba(0,0,0,0.12),
-      inset 0 1px 0 rgba(255,255,255,0.5),
-      inset 0 -1px 0 rgba(0,0,0,0.05);
-  }
-
-  .slider-knob::before {
-    content: "";
-    position: absolute;
-    inset: 5px 7px;
-    border-radius: 999px;
-    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(255,255,255,0.32));
-  }
-
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(4, var(--btn-size));
-    gap: var(--gap);
-    justify-content: center;
-  }
-
-  button {
-    width: var(--btn-size);
-    height: var(--btn-size);
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    font-family: var(--font);
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.01em;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    outline: none;
-    -webkit-tap-highlight-color: transparent;
-    position: relative;
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.35),
-      0 4px 8px rgba(0,0,0,0.12);
-    transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease, opacity 0.08s ease;
-  }
-
-  button::after {
-    content: "";
-    position: absolute;
-    inset: 8px 10px auto 10px;
-    height: 24%;
-    border-radius: 999px;
-    background: rgba(255,255,255,0.18);
-    pointer-events: none;
-  }
-
-  button:hover {
-    transform: translateY(-1px);
-  }
-
-  button:active {
-    transform: translateY(1px) scale(0.99);
-    box-shadow:
-      inset 0 2px 4px rgba(0,0,0,0.18),
-      0 1px 3px rgba(0,0,0,0.1);
-  }
-
-  button:focus-visible {
-    box-shadow:
-      inset 0 1px 0 rgba(255,255,255,0.35),
-      0 0 0 2px rgba(118, 96, 52, 0.34),
-      0 4px 8px rgba(0,0,0,0.12);
-  }
-
-  button:not(.fn):not(.op):not(.eq) {
-    background: linear-gradient(180deg, #b4b1a8 0%, var(--num-bg) 100%);
-    color: var(--text-dark);
-  }
-
-  button:not(.fn):not(.op):not(.eq):hover {
-    background: linear-gradient(180deg, #a9a69d 0%, var(--num-bg-hover) 100%);
-  }
-
-  button:not(.fn):not(.op):not(.eq):active {
-    background: linear-gradient(180deg, #9f9b92 0%, var(--num-bg-active) 100%);
-  }
-
-  button.fn,
-  button.op {
-    background: linear-gradient(180deg, #3a342e 0%, var(--fn-bg) 100%);
-    color: var(--text-light);
-  }
-
-  button.fn:hover,
-  button.op:hover {
-    background: linear-gradient(180deg, #433c35 0%, var(--fn-bg-hover) 100%);
-  }
-
-  button.fn:active,
-  button.op:active {
-    background: linear-gradient(180deg, #2b261f 0%, var(--fn-bg-active) 100%);
-  }
-
-  button.fn {
-    font-size: 13px;
-    letter-spacing: 0.05em;
-  }
-
-  button.op {
-    font-size: 18px;
-    font-weight: 500;
-  }
-
-  button.eq {
-    background: linear-gradient(180deg, #d2ab4f 0%, var(--eq-bg) 100%);
-    color: #fffaf0;
-    font-size: 18px;
-    font-weight: 700;
-  }
-
-  button.eq:hover {
-    background: linear-gradient(180deg, #ddb55a 0%, var(--eq-bg-hover) 100%);
-  }
-
-  button.eq:active {
-    background: linear-gradient(180deg, #c09443 0%, var(--eq-bg-active) 100%);
-  }
-
-  button[data-action="clear"],
-  button[data-action="backspace"] {
-    background: linear-gradient(180deg, #4a5a3a 0%, #3a4a2a 100%);
-  }
-  button[data-action="clear"]:hover,
-  button[data-action="backspace"]:hover {
-    background: linear-gradient(180deg, #556a44 0%, #445634 100%);
-  }
-  button[data-action="clear"]:active,
-  button[data-action="backspace"]:active {
-    background: linear-gradient(180deg, #3a4a2a 0%, #2e3a1e 100%);
-  }
-
-  .spacer {
-    width: var(--btn-size);
-    height: var(--btn-size);
-    border-radius: 50%;
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  @media (max-width: 520px) {
-    :root {
-      --btn-size: 58px;
-      --gap: 12px;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  
+  <!-- PWA Manifest (para Android y soporte completo) -->
+  <link rel="manifest" href="manifest.json">
+  
+  <!-- Apple Web App Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Braun Calc">
+  <meta name="theme-color" content="#f2efe7">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  
+  <title>Braun ET — Calculadora</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-.device {
-  width: calc(var(--btn-size) * 4 + var(--gap) * 3 + 38px);
-  padding: 16px;
-  border-radius: 4px 4px 30px 30px;
-}
+    :root {
+      --page-bg: #e7e2d8;
+      --case-bg: #efe8dc;
+      --case-shadow: 0 18px 40px rgba(0, 0, 0, 0.14), 0 3px 10px rgba(0, 0, 0, 0.08);
+      --case-line: rgba(90, 76, 58, 0.12);
+      --panel-bg: #f3eee4;
+      --panel-line: rgba(70, 60, 45, 0.14);
+      --lcd-bg: #c3c8b7;
+      --lcd-frame: #d6d2c8;
+      --lcd-text: #4a4d47;
+      --lcd-sub: #73766f;
+      --num-bg: #a8a59d;
+      --num-bg-hover: #9c9991;
+      --num-bg-active: #929087;
+      --fn-bg: #2f2a25;
+      --fn-bg-hover: #3a342d;
+      --fn-bg-active: #211d19;
+      --eq-bg: #c79a2e;
+      --eq-bg-hover: #b88926;
+      --eq-bg-active: #a77620;
+      --text-dark: #171510;
+      --text-light: #f5f3ee;
+      --brand: #9d968b;
+      --brand-strong: #756e63;
+      --green: #53b55b;
+      --green-glow: rgba(83, 181, 91, 0.85);
+      --red: #b44a4a;
+      --red-dim: #8f3b3b;
+      --btn-size: 50px;        /* Tamaño base más grande para mejor tacto */
+      --gap: 12px;
+      --radius: 30px;
+      --font: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.45), transparent 38%),
+        linear-gradient(180deg, #f1ebe1 0%, var(--page-bg) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font);
+      -webkit-font-smoothing: antialiased;
+      color: var(--text-dark);
+      padding: 10px;
+      margin: 0;
+    }
+
+    .device {
+      width: 100%;
+      max-width: 380px;         /* Se ajusta al ancho total de iPhone SE */
+      padding: 20px 16px 16px;
+      border-radius: 4px 4px 30px 30px;
+      background: linear-gradient(180deg, #f5efe5 0%, var(--case-bg) 100%);
+      border: 1px solid var(--case-line);
+      box-shadow: var(--case-shadow);
+      user-select: none;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      gap: 14px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding-top: 1px;
+    }
+
+    .brand-name {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--brand);
+    }
+
+    .brand-model {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      color: var(--brand);
+      text-transform: uppercase;
+    }
+
+    .status-lights {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding-top: 3px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.18);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,0.25);
+      opacity: 0.92;
+    }
+
+    .status-dot.green {
+      background: radial-gradient(circle at 35% 35%, #9cf4a2 0%, var(--green) 42%, #2f8e38 100%);
+      box-shadow: 0 0 6px var(--green-glow), inset 0 1px 1px rgba(255,255,255,0.35);
+    }
+
+    .status-dot.red {
+      background: radial-gradient(circle at 35% 35%, #ff9c9c 0%, #d76464 42%, var(--red-dim) 100%);
+    }
+
+    .screen-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .screen-lights {
+      display: flex;
+      flex-direction: row;
+      gap: 15px;
+      align-items: center;
+      padding-left: 4px;
+    }
+
+    .display-shell {
+      background: linear-gradient(180deg, #e4dfd5 0%, #d9d2c7 100%);
+      border: 1px solid var(--lcd-frame);
+      border-radius: 4px;
+      padding: 14px;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.55),
+        inset 0 -1px 0 rgba(0,0,0,0.05);
+    }
+
+    .display {
+      height: 52px;
+      border-radius: 4px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.20), rgba(255,255,255,0)),
+        linear-gradient(180deg, #c7ccb9 0%, var(--lcd-bg) 100%);
+      border: 1px solid rgba(87, 92, 80, 0.18);
+      box-shadow:
+        inset 0 2px 5px rgba(255,255,255,0.28),
+        inset 0 -2px 6px rgba(63, 70, 56, 0.08);
+      padding: 6px 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-end;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .display::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.12), transparent 35%, rgba(0,0,0,0.03));
+      pointer-events: none;
+    }
+
+    .display-expr {
+      position: relative;
+      z-index: 1;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--lcd-sub);
+      letter-spacing: 0.08em;
+      min-height: 14px;
+      text-align: right;
+      word-break: break-all;
+      opacity: 0.9;
+    }
 
     .display-main {
-      font-size: 30px;
+      position: relative;
+      z-index: 1;
+      font-family: 'Orbitron', monospace;
+      font-size: 26px;
+      font-weight: 500;
+      color: var(--lcd-text);
+      letter-spacing: 0.08em;
+      text-align: right;
+      word-break: break-all;
+      line-height: 1;
+      margin-top: 2px;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.18);
+      transition: opacity 0.08s ease;
     }
-  }
-</style>
+
+    .display-main.flash {
+      opacity: 0.38;
+    }
+
+    .display-main.error {
+      font-size: 20px;
+      color: #7a4a4a;
+      letter-spacing: 0.03em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, var(--btn-size));
+      gap: var(--gap);
+      justify-content: center;
+      margin-top: 6px;
+    }
+
+    button {
+      width: var(--btn-size);
+      height: var(--btn-size);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 4px 8px rgba(0,0,0,0.12);
+      transition: transform 0.08s ease, box-shadow 0.08s ease, background 0.08s ease, opacity 0.08s ease;
+    }
+
+    button::after {
+      content: "";
+      position: absolute;
+      inset: 8px 10px auto 10px;
+      height: 24%;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      pointer-events: none;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow:
+        inset 0 2px 4px rgba(0,0,0,0.18),
+        0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    button:focus-visible {
+      box-shadow:
+        inset 0 1px 0 rgba(255,255,255,0.35),
+        0 0 0 2px rgba(118, 96, 52, 0.34),
+        0 4px 8px rgba(0,0,0,0.12);
+    }
+
+    /* Números */
+    button:not(.fn):not(.op):not(.eq) {
+      background: linear-gradient(180deg, #b4b1a8 0%, var(--num-bg) 100%);
+      color: var(--text-dark);
+      font-size: 20px;
+    }
+
+    button:not(.fn):not(.op):not(.eq):hover {
+      background: linear-gradient(180deg, #a9a69d 0%, var(--num-bg-hover) 100%);
+    }
+
+    button:not(.fn):not(.op):not(.eq):active {
+      background: linear-gradient(180deg, #9f9b92 0%, var(--num-bg-active) 100%);
+    }
+
+    /* Operadores (+, -, ×, ÷) y ahora también la coma */
+    button.op {
+      background: linear-gradient(180deg, #3a342e 0%, var(--fn-bg) 100%);
+      color: var(--text-light);
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    button.op:hover {
+      background: linear-gradient(180deg, #433c35 0%, var(--fn-bg-hover) 100%);
+    }
+
+    button.op:active {
+      background: linear-gradient(180deg, #2b261f 0%, var(--fn-bg-active) 100%);
+    }
+
+    /* Verde militar solo para C y ⌫ */
+    button.fn {
+      background: linear-gradient(180deg, #4a5a3a 0%, #3a4a2a 100%);
+      color: var(--text-light);
+      font-size: 16px;
+      letter-spacing: 0.05em;
+    }
+
+    button.fn:hover {
+      background: linear-gradient(180deg, #556a44 0%, #445634 100%);
+    }
+
+    button.fn:active {
+      background: linear-gradient(180deg, #3a4a2a 0%, #2e3a1e 100%);
+    }
+
+    /* Botón = */
+    button.eq {
+      background: linear-gradient(180deg, #d2ab4f 0%, var(--eq-bg) 100%);
+      color: #fffaf0;
+      font-size: 22px;
+      font-weight: 700;
+      box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+    }
+
+    button.eq:hover {
+      background: linear-gradient(180deg, #ddb55a 0%, var(--eq-bg-hover) 100%);
+    }
+
+    button.eq:active {
+      background: linear-gradient(180deg, #c09443 0%, var(--eq-bg-active) 100%);
+    }
+
+    .spacer {
+      width: var(--btn-size);
+      height: var(--btn-size);
+      border-radius: 50%;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Ajustes específicos para pantallas muy pequeñas (iPhone SE) */
+    @media (max-width: 380px) {
+      :root {
+        --btn-size: 48px;
+        --gap: 10px;
+      }
+
+      .device {
+        padding: 14px 10px 10px;
+      }
+
+      .display-main {
+        font-size: 24px;
+      }
+
+      button {
+        font-size: 17px;
+      }
+    }
+  </style>
 </head>
 <body>
 
 <div class="device" role="application" aria-label="Calculadora Braun">
-<div class="topbar">
-  <div class="brand">
-    <span class="brand-name">Braun</span>
-    <span class="brand-model">DK 1985</span>
-  </div>
-</div>
-
- <div class="screen-row">
-  <div class="display-shell">
-    <div class="display" aria-live="polite" aria-atomic="true">
-      <div class="display-expr" id="expr"></div>
-      <div class="display-main" id="main">0</div>
+  <div class="topbar">
+    <div class="brand">
+      <span class="brand-name">BRAUN</span>
+      <span class="brand-model">DK 1985</span>
+    </div>
+    <div class="status-lights" aria-hidden="true">
+      <span class="status-dot green"></span>
+      <span class="status-dot red"></span>
     </div>
   </div>
-  <div class="status-lights screen-lights" aria-hidden="true">
-    <span class="status-dot green"></span>
-    <span class="status-dot red"></span>
+
+  <div class="screen-row">
+    <div class="display-shell">
+      <div class="display" aria-live="polite" aria-atomic="true">
+        <div class="display-expr" id="expr"></div>
+        <div class="display-main" id="main">0</div>
+      </div>
+    </div>
   </div>
-</div>
 
   <div class="grid">
-    <!-- Row 1 -->
+    <!-- Fila 1 -->
     <button class="fn" data-action="clear" aria-label="Borrar todo">C</button>
     <button class="fn" data-action="backspace" aria-label="Borrar último">⌫</button>
     <button class="fn" data-action="percent" aria-label="Porcentaje">%</button>
     <button class="op" data-action="op" data-op="÷" aria-label="Dividir">÷</button>
 
-    <!-- Row 2 -->
+    <!-- Fila 2 -->
     <button data-action="digit" data-digit="7">7</button>
     <button data-action="digit" data-digit="8">8</button>
     <button data-action="digit" data-digit="9">9</button>
     <button class="op" data-action="op" data-op="×" aria-label="Multiplicar">×</button>
 
-    <!-- Row 3 -->
+    <!-- Fila 3 -->
     <button data-action="digit" data-digit="4">4</button>
     <button data-action="digit" data-digit="5">5</button>
     <button data-action="digit" data-digit="6">6</button>
     <button class="op" data-action="op" data-op="−" aria-label="Restar">−</button>
 
-    <!-- Row 4 -->
+    <!-- Fila 4 -->
     <button data-action="digit" data-digit="1">1</button>
     <button data-action="digit" data-digit="2">2</button>
     <button data-action="digit" data-digit="3">3</button>
     <button class="op" data-action="op" data-op="+" aria-label="Sumar">+</button>
 
-    <!-- Row 5 -->
+    <!-- Fila 5 -->
     <button data-action="digit" data-digit="0" aria-label="Cero">0</button>
     <button class="op" data-action="decimal" aria-label="Decimal">,</button>
     <button class="eq" data-action="equals" aria-label="Igual">=</button>
@@ -511,20 +448,17 @@
 <script>
   'use strict';
 
-  // ── State ──────────────────────────────────────────────────────────────────
   const state = {
-    current:       '0',   // what's shown in the display
-    stored:        null,  // first operand (number)
-    op:            null,  // pending operator string
-    justEvaled:    false, // did we just press =?
-    waitingOperand:false, // next digit starts a new number
+    current:       '0',
+    stored:        null,
+    op:            null,
+    justEvaled:    false,
+    waitingOperand:false,
   };
 
-  // ── DOM refs ───────────────────────────────────────────────────────────────
   const mainEl = document.getElementById('main');
   const exprEl = document.getElementById('expr');
 
-  // ── Render ─────────────────────────────────────────────────────────────────
   function render() {
     mainEl.className = 'display-main';
     mainEl.textContent = state.current;
@@ -542,7 +476,6 @@
   }
 
   function formatNum(n) {
-    // Up to 8 decimal places, strip trailing zeros
     let s = parseFloat(n.toFixed(8)).toString();
     return s;
   }
@@ -551,7 +484,6 @@
     mainEl.textContent = msg;
     mainEl.className   = 'display-main error';
     exprEl.textContent = '';
-    // Reset state so next input starts fresh
     state.current        = '0';
     state.stored         = null;
     state.op             = null;
@@ -559,20 +491,18 @@
     state.justEvaled     = false;
   }
 
-  // ── Core calculation ───────────────────────────────────────────────────────
   function calculate(a, op, b) {
     switch (op) {
       case '+': return a + b;
       case '−': return a - b;
       case '×': return a * b;
       case '÷':
-        if (b === 0) return null; // signal error
+        if (b === 0) return null;
         return a / b;
       default: return b;
     }
   }
 
-  // ── Actions ────────────────────────────────────────────────────────────────
   function inputDigit(d) {
     if (state.waitingOperand || state.justEvaled) {
       state.current        = d;
@@ -599,12 +529,10 @@
   }
 
   function toNum(s) {
-    // Replace comma decimal separator with dot for parseFloat
     return parseFloat(s.replace(',', '.'));
   }
 
   function fromNum(n) {
-    // Convert number back to display string (use comma)
     return formatNum(n).replace('.', ',');
   }
 
@@ -612,7 +540,6 @@
     const cur = toNum(state.current);
 
     if (state.op !== null && !state.waitingOperand) {
-      // Chain: evaluate pending operation first
       const result = calculate(state.stored, state.op, cur);
       if (result === null) { showError('Error'); return; }
       const rounded = parseFloat(result.toFixed(8));
@@ -632,19 +559,15 @@
     const cur = toNum(state.current);
 
     if (state.op === null || state.stored === null) {
-      // No pending op: just divide by 100
       const result = parseFloat((cur / 100).toFixed(8));
       state.current     = fromNum(result);
       state.justEvaled  = false;
       state.waitingOperand = false;
     } else {
-      // Has pending operator: Windows-style percent
       let pct;
       if (state.op === '+' || state.op === '−') {
-        // percentage of first operand
         pct = state.stored * (cur / 100);
       } else {
-        // multiply/divide: just convert to decimal
         pct = cur / 100;
       }
       const rounded = parseFloat(pct.toFixed(8));
@@ -692,7 +615,6 @@
     render();
   }
 
-  // ── Button click dispatch ──────────────────────────────────────────────────
   document.querySelector('.grid').addEventListener('click', e => {
     const btn = e.target.closest('button');
     if (!btn) return;
@@ -709,7 +631,6 @@
     }
   });
 
-  // ── Keyboard ───────────────────────────────────────────────────────────────
   document.addEventListener('keydown', e => {
     if (e.metaKey || e.ctrlKey || e.altKey) return;
 
@@ -727,7 +648,6 @@
     if (k === '/')               { e.preventDefault(); inputOperator('÷'); return; }
   });
 
-  // ── Init ───────────────────────────────────────────────────────────────────
   render();
 </script>
 </body>
